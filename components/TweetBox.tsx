@@ -27,60 +27,62 @@ export default function TweetBox({ userId, onTweetPosted }: TweetBoxProps) {
 
   const fetchRecentTweets = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/api/tweets/${userId}`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        },
-        credentials: 'include',
-      });
+        const response = await fetch(`https://gossip-backend-fn8d.onrender.com/api/tweets/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+            },
+            credentials: 'include',
+        });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      if (data.error) {
-        console.error('Error from API:', data.error);
-        return;
-      }
-      
-      setRecentTweets(data.tweets);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        if (data.error) {
+            console.error('Error from API:', data.error);
+            return;
+        }
+        
+        setRecentTweets(data.tweets);
     } catch (error) {
-      console.error('Error fetching tweets:', error);
+        console.error('Error fetching tweets:', error);
     }
-  };
+};
 
-  const handleTweet = async () => {
-    if (!tweet.trim()) return;
+const handleTweet = async () => {
+  if (!tweet.trim()) return;
 
-    setIsLoading(true);
-    try {
-      const response = await fetch(`http://localhost:8000/api/tweet/${userId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ content: tweet }),
+  setIsLoading(true);
+  try {
+      const response = await fetch(`https://gossip-backend-fn8d.onrender.com/api/tweet/${userId}`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ content: tweet }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to post tweet');
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Failed to post tweet');
       }
 
       setTweet('');
       fetchRecentTweets();
       onTweetPosted?.();
-    } catch (error) {
+  } catch (error) {
       console.error('Error posting tweet:', error);
-      alert(error.message || 'Failed to post tweet. Please try again.');
-    } finally {
+      // Type assertion to handle the error correctly
+      const errorMessage = (error as Error).message || 'Failed to post tweet. Please try again.';
+      alert(errorMessage);
+  } finally {
       setIsLoading(false);
-    }
-  };
+  }
+};
 
   return (
     <div className="w-full max-w-md space-y-8">
