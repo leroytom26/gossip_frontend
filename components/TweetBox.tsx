@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react';
 
 interface Tweet {
   id: string
@@ -21,11 +21,7 @@ export default function TweetBox({ userId, onTweetPosted }: TweetBoxProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [recentTweets, setRecentTweets] = useState<Tweet[]>([])
 
-  useEffect(() => {
-    fetchRecentTweets()
-  }, [userId])
-
-  const fetchRecentTweets = async () => {
+  const fetchRecentTweets = useCallback(async () => {
     try {
         const response = await fetch(`https://gossip-backend-fn8d.onrender.com/api/tweets/${userId}`, {
             method: 'GET',
@@ -49,7 +45,11 @@ export default function TweetBox({ userId, onTweetPosted }: TweetBoxProps) {
     } catch (error) {
         console.error('Error fetching tweets:', error);
     }
-};
+}, [userId]);
+
+  useEffect(() => {
+    fetchRecentTweets();
+  }, [fetchRecentTweets]);
 
 const handleTweet = async () => {
   if (!tweet.trim()) return;
